@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<script src="scripts/jquery.js"></script>
+<script src="scripts/underscore.js"></script>
+<script src="scripts/vue.js"></script>
+<link rel="stylesheet" href="styles/bootstrap.min.css" />
+<!-- <link rel="stylesheet" href="styles/bootstrap-grid.css" /> -->
+<!-- <script src="scripts/bootstrap.min.js"></script> -->
+
+<div id="poll-worker-setup" class="container">
+    <div class="mt-2 mb-1 row mx-auto">
+        <div class="alert-warning p-3" role="alert">
+            <h4 class="alert-heading">Setting up device for elector</h4>
+            <p>Choose the elector's riding, and click next.</p>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-10 push-1">
+            Choose the elector's riding:
+            <select class="form-control-lg form-control" v-model="selected_riding">
+                <option disabled value="">Please select one</option>
+                <option v-for="riding in ridings">{{ riding }}</option>
+            </select>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-3 push-8">
+            <button type="button" class="btn btn-primary" v-on:click="setup">
+                Next &rarr;
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="intro-screen" class="container hidden-lg-down">
+    <div class="mt-2 mb-1 row mx-auto">
+        <div class="alert-info p-3" role="alert">
+            <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
+            <p>Our records indicate that you are voting in the <strong>{{ riding }}</strong> riding. If this is incorrect, please see a poll worker.</p>
+            <p>For each eligible race, you may choose one candidate from the list, or write in your own candidate.</p>
+            <p>At the end of the voting process, please return this device to the election worker.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        You may vote in the following races:
+        <ul>
+            <li v-for="(candidates, race) in races">{{ race }}</li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-3 push-8">
+            <button type="button" class="btn btn-primary" v-on:click="setup">
+                Next &rarr;
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="voting-and-confirmation" class="container hidden-lg-down">
+    <div v-if="all_races_voted()">
+        <div class="mt-2 mb-1 row mx-auto">
+            <div class="alert-info p-3" role="alert">
+                <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
+                <p>Please review your choices. If you wish to start over, click 'Start Over'. If your choices are correct, click 'Next'.</p>
+            </div>
+        </div>
+
+
+        <div class="row mx-auto">
+            <ul>
+                <li v-for="(person, post) in voted_races"><strong>{{ post }}</strong>: {{ person }}</li>
+            </ul>
+        </div>
+
+
+        <div class="row">
+            <div class="col-3 push-1">
+                <button type="button" class="btn btn-danger" v-on:click="clear">
+                    &larr; Start Over
+                </button>
+            </div>
+            <div class="col-3 push-5">
+                <button type="button" class="btn btn-success" v-on:click="confirmChoices">
+                    Confirm Choices &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+    <div v-else>
+        <div class="mt-2 mb-1 row mx-auto">
+            <div class="alert-info p-3" role="alert">
+                <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
+                <p>You are currently voting for {{ current_race() }}.</p>
+                <p>You may choose one candidate from the list, or write in your own candidate.</p>
+            </div>
+        </div>
+
+        <div class="row mx-auto">
+
+            <div class="radio">
+                <label v-for="c in current_candidates()">
+                    <input type="radio" name="candidate" :value="c" v-model="selected_candidate">
+                    {{ c }}
+                </label>
+                <label>
+                    <input type="text" name="candidate" v-model="selected_candidate">
+                    Write-in candidate
+                </label>
+                <label>
+                    <input type="radio" name="candidate" v-model="selected_candidate">
+                    Decline
+                </label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3 push-5">
+                <button type="button" class="btn btn-success" v-on:click="setup">
+                    Next &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="csat-screen" class="container hidden-lg-down">
+    <div class="mt-2 mb-1 row mx-auto">
+        <div class="alert-success p-3" role="alert">
+            <h4 class="alert-heading">You have voted in the 2016 General Election!</h4>
+            <p>Please return this device to the election worker.</p>
+        </div>
+    </div>
+
+    <div class="row mx-auto">
+        <form>
+            <div class="form-group">
+                <label for="election-experience-btn">How was your election experience?</label>
+                <div id="election-experience-btn" class="align-items-center btn-group btn-group-lg" role="group" aria-label="...">
+                    <button type="button" class="btn btn-default btn-lg">🙁</button>
+                    <button type="button" class="btn btn-default btn-lg">🙂</button>
+                    <button type="button" class="btn btn-default btn-lg">🙂</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row mx-auto">
+         <button type="button" class="btn btn-outline-danger" v-on:click="window.location.reload()">Poll Worker Reset</button>
+    </div>
+</div>
+
+
+<script>
+    var PollWorkerSetup = new Vue({
+    el: "#poll-worker-setup",
+    data: {
+        selected_riding: "",
+        ridings: ["Riding 1", "Scranton/Wilkes-Barre", "Kitchener-Central", "Waterloo-North"],
+        riding_race_candidates: {
+            "Riding 1": {
+                "Mayor": ["Candidate A", "Candidate B"],
+                "Education Board": ["John Smith", "Jane Doe"],
+            },
+            "Scranton/Wilkes-Barre": {
+                "Regional Manager": ["Michael Scott"],
+                "Assistant to the Regional Manager": ["Dwight Schrute", "Andy Barnard"]
+            },
+            "Kitchener-Central": {
+                "President": ["Candidate A", "Candidate B"]
+            },
+            "Waterloo-North": {
+                "Member of Provincial Parliament": ["Alpha Alpha", "Bravo Bravo", "Charlie Charlie"]
+            }
+        }
+    },
+    methods: {
+        setup: function () {
+            if (!this.$data.selected_riding) {
+                return;
+            }
+
+            var IntroScreen = new Vue({
+                el: "#intro-screen",
+                data: {
+                    riding: this.$data.selected_riding,
+                    races: PollWorkerSetup.$data["riding_race_candidates"][this.$data.selected_riding]
+                },
+                methods: {
+                    setup: function () {
+                        var VotingScreen = new Vue({
+                            el: "#voting-and-confirmation",
+                            data: {
+                                races: IntroScreen.$data["races"],
+                                voted_races: {},
+                                selected_candidate: "",
+                                confirm: ""
+                            },
+                            methods: {
+                                clear: function() {
+                                    this.$data.voted_races = {};
+                                },
+                                setup: function() {
+                                    this.$data.voted_races[this.current_race()] = this.$data["selected_candidate"];
+                                    this.$data["selected_candidate"] = "";
+
+                                    this.$forceUpdate();
+                                },
+                                confirmChoices: function() {
+                                    if (this.all_races_voted()) {
+                                        var CsatScreen = new Vue({
+                                            el: "#csat-screen",
+                                            data: {
+                                                window: document
+                                            }
+                                        });
+                                        $(CsatScreen.$el).removeClass("hidden-lg-down");
+                                        $(VotingScreen.$el).addClass("hidden-lg-down");
+                                    }
+                                },
+                                all_races_voted: function() {
+                                    return Object.keys(this.$data.voted_races).length === Object.keys(this.$data.races).length;
+                                },
+                                current_race: function() {
+                                    return _.first(_.difference(Object.keys(this.$data.races), Object.keys(this.$data.voted_races)));
+                                },
+                                current_candidates: function() {
+                                    return this.$data.races[this.current_race()];
+                                }
+                            }
+                        });
+                        $(VotingScreen.$el).removeClass("hidden-lg-down");
+                        $(IntroScreen.$el).addClass("hidden-lg-down");
+                    }
+                }
+            });
+            $(PollWorkerSetup.$el).addClass("hidden-lg-down");
+            $(IntroScreen.$el).removeClass("hidden-lg-down");
+        }
+    }
+});
+
+
+
+</script>
