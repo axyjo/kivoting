@@ -154,21 +154,21 @@
         </div>
     </div>
 
-    <div class="row" class="hideable">
+    <div class="row hideable">
         <div class="col-12">
             <h4>How was your election experience?</h4>
         </div>
     </div>
 
-    <div class="row" class="hideable">
+    <div class="row hideable">
         <div class="col-4 mx-auto">
-            <button type="button" class="btn btn-default btn-lg" v-on:click="registerSat">🙁</button>
+            <button type="button" class="btn btn-outline-danger btn-lg" v-on:click="registerSat">&#x1f641;</button>
         </div>
         <div class="col-4 mx-auto">
-            <button type="button" class="btn btn-default btn-lg" v-on:click="registerSat">😐</button>
+            <button type="button" class="btn btn-outline-info btn-lg" v-on:click="registerSat">&#x1f610;</button>
         </div>
         <div class="col-4 mx-auto">
-            <button type="button" class="btn btn-default btn-lg" v-on:click="registerSat">🙂</button>
+            <button type="button" class="btn btn-outline-success btn-lg" v-on:click="registerSat">&#x1f642;</button>
         </div><!--
             <button type="button" class="btn btn-default btn-lg"></button>
             <button type="button" class="btn btn-default btn-lg"></button>
@@ -253,12 +253,9 @@
                                             data: {
                                                 window: document
                                             },
-                                            created: function() {
-                                                $(this.$el).find(".hideable").show();
-                                            },
                                             methods: {
                                                 registerSat: function() {
-                                                    $(this.$el).find(".hideable").hide();
+                                                    $(this.$el).find(".hideable").fadeOut();
                                                 }
                                             }
                                         });
