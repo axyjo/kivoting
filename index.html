@@ -47,15 +47,17 @@
     </div>
 
     <div class="row">
-        You may vote in the following races:
-        <ul>
-            <li v-for="(candidates, race) in races">{{ race }}</li>
-        </ul>
+        <div class="col-12">
+            You may vote in the following races:
+            <ul>
+                <li v-for="(candidates, race) in races">{{ race }}</li>
+            </ul>
+        </div>
     </div>
 
     <div class="row">
         <div class="col-3 push-8">
-            <button type="button" class="btn btn-primary" v-on:click="setup">
+            <button aria-label="Proceed to the first race ballot" type="button" class="btn btn-primary" v-on:click="setup">
                 Next &rarr;
             </button>
         </div>
@@ -74,18 +76,18 @@
 
         <div class="row mx-auto">
             <ul>
-                <li v-for="(person, post) in voted_races"><strong>{{ post }}</strong>: {{ person }}</li>
+                <li v-for="(person, post) in voted_races"><strong>{{ post }}</strong>: <span v-if="person">{{ person }}</span><span v-else><emph>(declined)</emph></span> </li>
             </ul>
         </div>
 
 
         <div class="row">
-            <div class="col-3 push-1">
+            <div class="col-3">
                 <button type="button" class="btn btn-danger" v-on:click="clear">
                     &larr; Start Over
                 </button>
             </div>
-            <div class="col-3 push-5">
+            <div class="col-3 push-3">
                 <button type="button" class="btn btn-success" v-on:click="confirmChoices">
                     Confirm Choices &rarr;
                 </button>
@@ -96,31 +98,38 @@
         <div class="mt-2 mb-1 row mx-auto">
             <div class="alert-info p-3" role="alert">
                 <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
-                <p>You are currently voting for {{ current_race() }}.</p>
-                <p>You may choose one candidate from the list, or write in your own candidate.</p>
+                <p>You are currently voting for <strong>{{ current_race() }}</strong>.</p>
+                <p>You can choose one candidate from the list, or write in your own candidate.</p>
             </div>
         </div>
 
         <div class="row mx-auto">
-
-            <div class="radio">
-                <label v-for="c in current_candidates()">
-                    <input type="radio" name="candidate" :value="c" v-model="selected_candidate">
-                    {{ c }}
-                </label>
-                <label>
-                    <input type="text" name="candidate" v-model="selected_candidate">
-                    Write-in candidate
-                </label>
-                <label>
-                    <input type="radio" name="candidate" v-model="selected_candidate">
-                    Decline
-                </label>
-            </div>
+            <form style="font-size: 200%">
+                <div class="form-check" v-for="c in current_candidates()">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="candidate" :value="c" v-model="selected_candidate">
+                        {{ c }}
+                    </label>
+                </div>
+                <label for="writeincandidate" class="col-sm-2 col-form-label">Write-in candidate</label>
+                <input type="text" class="form-control" id="writeincandidate" name="candidate" v-model="selected_candidate">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="candidate" v-model="selected_candidate">
+                        Decline this ballot
+                    </label>
+                </div>
+            </form>
         </div>
 
         <div class="row">
-            <div class="col-3 push-5">
+            <div class="col-3 float-left" v-if="has_data">
+                <button type="button" class="btn btn-danger" v-on:click="clear">
+                    &larr; Start Over
+                </button>
+            </div>
+            <div class="col-4">&nbsp;</div>
+            <div class="col-3 float-right">
                 <button type="button" class="btn btn-success" v-on:click="setup">
                     Next &rarr;
                 </button>
@@ -143,7 +152,7 @@
                 <label for="election-experience-btn">How was your election experience?</label>
                 <div id="election-experience-btn" class="align-items-center btn-group btn-group-lg" role="group" aria-label="...">
                     <button type="button" class="btn btn-default btn-lg">🙁</button>
-                    <button type="button" class="btn btn-default btn-lg">🙂</button>
+                    <button type="button" class="btn btn-default btn-lg">😐</button>
                     <button type="button" class="btn btn-default btn-lg">🙂</button>
                 </div>
             </div>
@@ -203,7 +212,10 @@
                             },
                             methods: {
                                 clear: function() {
+                                    debugger;
                                     this.$data.voted_races = {};
+                                    $(IntroScreen.$el).removeClass("hidden-lg-down");
+                                    $(VotingScreen.$el).addClass("hidden-lg-down");
                                 },
                                 setup: function() {
                                     this.$data.voted_races[this.current_race()] = this.$data["selected_candidate"];
@@ -222,6 +234,10 @@
                                         $(CsatScreen.$el).removeClass("hidden-lg-down");
                                         $(VotingScreen.$el).addClass("hidden-lg-down");
                                     }
+                                },
+                                has_data: function() {
+                                    console.log(Object.keys(this.$data.voted_races).length)
+                                    return Object.keys(this.$data.voted_races).length > 0;
                                 },
                                 all_races_voted: function() {
                                     return Object.keys(this.$data.voted_races).length === Object.keys(this.$data.races).length;
