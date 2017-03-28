@@ -8,17 +8,25 @@
 <link rel="stylesheet" href="styles/bootstrap.min.css" />
 <!-- <link rel="stylesheet" href="styles/bootstrap-grid.css" /> -->
 <!-- <script src="scripts/bootstrap.min.js"></script> -->
+<style>
+    .container {
+        margin-top:1rem;
+    }
+</style>
+
 
 <div id="poll-worker-setup" class="container">
-    <div class="mt-2 mb-1 row mx-auto">
-        <div class="alert-warning p-3" role="alert">
-            <h4 class="alert-heading">Setting up device for elector</h4>
-            <p>Choose the elector's riding, and click next.</p>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert-warning p-3" role="alert">
+                <h4 class="alert-heading">Setting up device for elector</h4>
+                <p>Choose the elector's riding, and click next.</p>
+            </div>
         </div>
     </div>
 
     <div class="row mb-2">
-        <div class="col-10 push-1">
+        <div class="col-12">
             Choose the elector's riding:
             <select class="form-control-lg form-control" v-model="selected_riding">
                 <option disabled value="">Please select one</option>
@@ -38,14 +46,16 @@
 </div>
 
 <div id="intro-screen" class="container hidden-lg-down">
-    <div class="mt-2 mb-1 row mx-auto">
-        <div class="alert-info p-3" role="alert">
-            <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
-            <p>You are voting in the <strong>{{ riding }}</strong> riding. If this is incorrect, please see a poll worker.</p>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert-info p-3" role="alert">
+                <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
+                <p>You are voting in the <strong>{{ riding }}</strong> riding. If this is incorrect, please see a poll worker.</p>
+            </div>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" style="font-size: 200%">
         <div class="col-12">
             You may vote in the following races:
             <ul>
@@ -65,15 +75,17 @@
 
 <div id="voting-and-confirmation" class="container hidden-lg-down">
     <div v-if="all_races_voted()">
-        <div class="mt-2 mb-1 row mx-auto">
-            <div class="alert-info p-3" role="alert">
-                <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
-                <p>Please review your choices. If you wish to start over, click 'Start Over'. If your choices are correct, click 'Next'.</p>
+        <div class="row">
+            <div class="col-12">
+                <div class="alert-info p-3" role="alert">
+                    <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
+                    <p>Please review your choices. If you wish to start over, click 'Start Over'. If your choices are correct, click 'Next'.</p>
+                </div>
             </div>
         </div>
 
 
-        <div class="row mx-auto">
+        <div class="row mx-auto" style="font-size: 200%">
             <ul>
                 <li v-for="(person, post) in voted_races"><strong>{{ post }}</strong>: <span v-if="person">{{ person }}</span><span v-else><emph>(declined)</emph></span> </li>
             </ul>
@@ -92,11 +104,13 @@
         </div>
     </div>
     <div v-else>
-        <div class="mt-2 mb-1 row mx-auto">
-            <div class="alert-info p-3" role="alert">
-                <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
-                <p>You are currently voting for <strong>{{ current_race() }}</strong>.</p>
-                <p>You can choose one candidate from the list, or write in your own candidate.</p>
+        <div class="row">
+            <div class="col-12">
+                <div class="alert-info p-3" role="alert">
+                    <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
+                    <p>You are currently voting for <strong>{{ current_race() }}</strong>.</p>
+                    <p>You can choose one candidate from the list, or write in your own candidate.</p>
+                </div>
             </div>
         </div>
 
@@ -140,21 +154,31 @@
         </div>
     </div>
 
-    <div class="row mx-auto">
-        <form>
-            <div class="form-group">
-                <label for="election-experience-btn">How was your election experience?</label>
-                <div id="election-experience-btn" class="align-items-center btn-group btn-group-lg" role="group" aria-label="...">
-                    <button type="button" class="btn btn-default btn-lg">🙁</button>
-                    <button type="button" class="btn btn-default btn-lg">😐</button>
-                    <button type="button" class="btn btn-default btn-lg">🙂</button>
-                </div>
-            </div>
-        </form>
+    <div class="row" class="hideable">
+        <div class="col-12">
+            <h4>How was your election experience?</h4>
+        </div>
     </div>
 
-    <div class="row mx-auto">
-         <button type="button" class="btn btn-lg btn-outline-danger" v-on:click="window.location.reload()">Poll Worker Reset</button>
+    <div class="row" class="hideable">
+        <div class="col-4 mx-auto">
+            <button type="button" class="btn btn-default btn-lg" v-on:click="registerSat">🙁</button>
+        </div>
+        <div class="col-4 mx-auto">
+            <button type="button" class="btn btn-default btn-lg" v-on:click="registerSat">😐</button>
+        </div>
+        <div class="col-4 mx-auto">
+            <button type="button" class="btn btn-default btn-lg" v-on:click="registerSat">🙂</button>
+        </div><!--
+            <button type="button" class="btn btn-default btn-lg"></button>
+            <button type="button" class="btn btn-default btn-lg"></button>
+        </div>-->
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <button type="button" class="btn btn-lg btn-outline-danger" v-on:click="window.location.reload()">Poll Worker Reset</button>
+        </div>
     </div>
 </div>
 
@@ -228,6 +252,14 @@
                                             el: "#csat-screen",
                                             data: {
                                                 window: document
+                                            },
+                                            created: function() {
+                                                $(this.$el).find(".hideable").show();
+                                            },
+                                            methods: {
+                                                registerSat: function() {
+                                                    $(this.$el).find(".hideable").hide();
+                                                }
                                             }
                                         });
                                         $(CsatScreen.$el).removeClass("hidden-lg-down");
