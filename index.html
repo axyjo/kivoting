@@ -28,8 +28,8 @@
 
 
     <div class="row">
-        <div class="col-3 push-8">
-            <button type="button" class="btn btn-primary" v-on:click="setup">
+        <div class="col-12">
+            <button type="button" class="float-right btn btn-lg btn-primary" v-on:click="setup">
                 Next &rarr;
             </button>
         </div>
@@ -40,9 +40,7 @@
     <div class="mt-2 mb-1 row mx-auto">
         <div class="alert-info p-3" role="alert">
             <h4 class="alert-heading">You are voting in the 2016 General Election</h4>
-            <p>Our records indicate that you are voting in the <strong>{{ riding }}</strong> riding. If this is incorrect, please see a poll worker.</p>
-            <p>For each eligible race, you may choose one candidate from the list, or write in your own candidate.</p>
-            <p>At the end of the voting process, please return this device to the election worker.</p>
+            <p>You are voting in the <strong>{{ riding }}</strong> riding. If this is incorrect, please see a poll worker.</p>
         </div>
     </div>
 
@@ -56,9 +54,9 @@
     </div>
 
     <div class="row">
-        <div class="col-3 push-8">
-            <button aria-label="Proceed to the first race ballot" type="button" class="btn btn-primary" v-on:click="setup">
-                Next &rarr;
+        <div class="col-12">
+            <button aria-label="Proceed to the first race ballot" type="button" class="float-right btn btn-lg btn-success" v-on:click="setup">
+                &rarr;
             </button>
         </div>
     </div>
@@ -82,14 +80,12 @@
 
 
         <div class="row">
-            <div class="col-3">
-                <button type="button" class="btn btn-danger" v-on:click="clear">
-                    &larr; Start Over
+            <div class="col-12">
+                <button type="button" aria-label="Start Over" class="float-left btn btn-lg btn-danger" v-on:click="clear">
+                    &larr;
                 </button>
-            </div>
-            <div class="col-3 push-3">
-                <button type="button" class="btn btn-success" v-on:click="confirmChoices">
-                    Confirm Choices &rarr;
+                <button type="button" aria-label="Confirm Choices" class="float-right btn btn-lg btn-success" v-on:click="confirmChoices">
+                    &rarr;
                 </button>
             </div>
         </div>
@@ -123,15 +119,12 @@
         </div>
 
         <div class="row">
-            <div class="col-3 float-left" v-if="has_data">
-                <button type="button" class="btn btn-danger" v-on:click="clear">
-                    &larr; Start Over
+            <div class="col-12 " v-if="has_data">
+                <button type="button" aria-label="Start Over" class="float-left btn btn-lg btn-danger" v-on:click="clear">
+                    &larr;
                 </button>
-            </div>
-            <div class="col-4">&nbsp;</div>
-            <div class="col-3 float-right">
-                <button type="button" class="btn btn-success" v-on:click="setup">
-                    Next &rarr;
+                <button type="button" aria-label="Go to Next Race" class="float-right btn btn-lg btn-success" v-on:click="setup">
+                    &rarr;
                 </button>
             </div>
         </div>
@@ -160,7 +153,7 @@
     </div>
 
     <div class="row mx-auto">
-         <button type="button" class="btn btn-outline-danger" v-on:click="window.location.reload()">Poll Worker Reset</button>
+         <button type="button" class="btn btn-lg btn-outline-danger" v-on:click="window.location.reload()">Poll Worker Reset</button>
     </div>
 </div>
 
@@ -198,11 +191,17 @@
                 el: "#intro-screen",
                 data: {
                     riding: this.$data.selected_riding,
-                    races: PollWorkerSetup.$data["riding_race_candidates"][this.$data.selected_riding]
+                    races: PollWorkerSetup.$data["riding_race_candidates"][this.$data.selected_riding],
+                    votingScreen: null,
                 },
                 methods: {
                     setup: function () {
-                        var VotingScreen = new Vue({
+                        if (this.votingScreen) {
+                            $(this.votingScreen.$el).removeClass("hidden-lg-down");
+                            $(IntroScreen.$el).addClass("hidden-lg-down");
+                            return
+                        }
+                        this.votingScreen = new Vue({
                             el: "#voting-and-confirmation",
                             data: {
                                 races: IntroScreen.$data["races"],
@@ -212,10 +211,9 @@
                             },
                             methods: {
                                 clear: function() {
-                                    debugger;
                                     this.$data.voted_races = {};
                                     $(IntroScreen.$el).removeClass("hidden-lg-down");
-                                    $(VotingScreen.$el).addClass("hidden-lg-down");
+                                    $(this.$el).addClass("hidden-lg-down");
                                 },
                                 setup: function() {
                                     this.$data.voted_races[this.current_race()] = this.$data["selected_candidate"];
@@ -232,7 +230,7 @@
                                             }
                                         });
                                         $(CsatScreen.$el).removeClass("hidden-lg-down");
-                                        $(VotingScreen.$el).addClass("hidden-lg-down");
+                                        $(this.$el).addClass("hidden-lg-down");
                                     }
                                 },
                                 has_data: function() {
@@ -250,7 +248,7 @@
                                 }
                             }
                         });
-                        $(VotingScreen.$el).removeClass("hidden-lg-down");
+                        $(this.votingScreen.$el).removeClass("hidden-lg-down");
                         $(IntroScreen.$el).addClass("hidden-lg-down");
                     }
                 }
